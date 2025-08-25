@@ -8,7 +8,6 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface SolicitudMapper {
 
-    @Mapping(target = "idRol", ignore = true)
-    Solicitud toModel(SolicitudRequest usuarioRequest);
+    Solicitud toModel(SolicitudRequest solicitudRequest);
 }
 

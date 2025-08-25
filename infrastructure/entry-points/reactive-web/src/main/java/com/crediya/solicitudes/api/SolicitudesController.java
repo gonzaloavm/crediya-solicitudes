@@ -29,16 +29,15 @@ public class SolicitudesController {
     private final SolicitudMapper solicitudMapper;
 
     @PostMapping
-    @Operation(summary = "Registrar un nuevo usuario", description = "Registra un usuario con sus datos personales y verifica la unicidad del correo.")
+    @Operation(summary = "Registrar una nueva solicitud", description = "Registra una solicitud de préstamo.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Usuario registrado con éxito"),
-            @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos (ej. campos obligatorios vacíos o salario fuera de rango)"),
-            @ApiResponse(responseCode = "409", description = "El correo electrónico ya está registrado por otro usuario")
+            @ApiResponse(responseCode = "201", description = "Solicitud de préstamo realizada con éxito"),
+            @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos (ej. campos obligatorios vacíos)"),
     })
-    public Mono<ResponseEntity<ApiResult<Void>>> registrar(@RequestBody SolicitudRequest usuarioRequest) {
-        log.info("Iniciando envío de solicitud: {}", "");
+    public Mono<ResponseEntity<ApiResult<Void>>> enviar(@RequestBody SolicitudRequest solicitudRequest) {
+        log.info("Iniciando envío de solicitud del usuario: {}", solicitudRequest.documentoIdentidad());
 
-        Solicitud solicitud = solicitudMapper.toModel(usuarioRequest);
+        Solicitud solicitud = solicitudMapper.toModel(solicitudRequest);
 
         return transactionalEnviarSolicitudPrestamo.enviar(solicitud)
                 .doOnSuccess(v -> log.info("Solicitud Enviada Exitosamente {}", ""))
