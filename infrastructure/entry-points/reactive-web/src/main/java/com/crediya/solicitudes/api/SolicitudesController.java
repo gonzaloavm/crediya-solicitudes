@@ -3,6 +3,7 @@ package com.crediya.solicitudes.api;
 import com.crediya.solicitudes.api.dto.api.ApiResult;
 import com.crediya.solicitudes.api.dto.solicitante.SolicitudRequest;
 import com.crediya.solicitudes.api.mapper.SolicitudMapper;
+import com.crediya.solicitudes.dto.JwtClaims;
 import com.crediya.solicitudes.model.solicitud.Solicitud;
 import com.crediya.solicitudes.transactional.TransactionalEnviarSolicitudPrestamo;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,11 +13,12 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
+
+import java.math.BigInteger;
 
 @RestController
 @RequestMapping("/api/v1/solicitudes")
@@ -34,12 +36,17 @@ public class SolicitudesController {
             @ApiResponse(responseCode = "201", description = "Solicitud de préstamo realizada con éxito"),
             @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos (ej. campos obligatorios vacíos)"),
     })
-    public Mono<ResponseEntity<ApiResult<Void>>> enviar(@RequestBody SolicitudRequest solicitudRequest) {
-        log.info("Iniciando envío de solicitud del usuario: {}", solicitudRequest.documentoIdentidad());
+    @PreAuthorize("hasAnyRole('CLIENTE')")
+    public Mono<ResponseEntity<ApiResult<Void>>> enviarSolicitud(
+            @RequestBody SolicitudRequest solicitudRequest,
+            @AuthenticationPrincipal JwtClaims userClaims) {
+        log.info("Iniciando envío de solicitud. documentoIdentidad={}", solicitudRequest.documentoIdentidad());
 
         Solicitud solicitud = solicitudMapper.toModel(solicitudRequest);
+        String documentoIdentidad = userClaims.documentoIdentidad();
+        String usuarioExternalId = userClaims.sub();
 
-        return transactionalEnviarSolicitudPrestamo.enviar(solicitud)
+        return transactionalEnviarSolicitudPrestamo.enviar(solicitud, documentoIdentidad, usuarioExternalId)
                 .doOnSuccess(v -> log.info("Solicitud Enviada Exitosamente {}", ""))
                 .thenReturn(ResponseEntity.status(201).body(
                         ApiResult.<Void>builder()
@@ -49,5 +56,6 @@ public class SolicitudesController {
                                 .build()
                 ));
     }
+
 
 }

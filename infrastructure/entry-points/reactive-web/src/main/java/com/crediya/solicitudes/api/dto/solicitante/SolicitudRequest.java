@@ -6,6 +6,9 @@ import jakarta.validation.constraints.NotNull;
 
 public record SolicitudRequest (
 
+    @NotBlank(message = "El ID del usuario no puede ser nulo")
+    String usuarioExternalId,
+
     @NotBlank(message = "El documento de identidad no puede estar vacío")
     String documentoIdentidad,
 
