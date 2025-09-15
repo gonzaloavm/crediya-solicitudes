@@ -1,11 +1,12 @@
 # Build Stage
-FROM eclipse-temurin:21-jdk-alpine as builder
+FROM eclipse-temurin:21-jdk-alpine AS builder
 
 WORKDIR /app
 
 # Copy Gradle wrapper and configuration files
 COPY gradlew .
 COPY gradle/wrapper/gradle-wrapper.jar gradle/wrapper/
+COPY gradle/wrapper/gradle-wrapper.properties gradle/wrapper/
 
 # Copy build scripts
 COPY build.gradle .
@@ -33,13 +34,15 @@ WORKDIR /app
 
 # Copy the JAR from the build stage
 # The JAR is typically found in applications/app-service/build/libs/
-COPY --from=builder /app/applications/app-service/build/libs/app-service-*.jar crediya-solicitudes.jar
+COPY --from=builder /app/applications/app-service/build/libs/crediya-solicitudes.jar crediya-solicitudes.jar
 
 VOLUME /tmp
 
-ENV JAVA_OPTS=" -Xshareclasses:name=cacheapp,cacheDir=/cache,nonfatal -XX:+UseContainerSupport -XX:MaxRAMPercentage=70 -Djava.security.egd=file:/dev/./urandom"
+ENV JAVA_OPTS=" -XX:+UseContainerSupport -XX:MaxRAMPercentage=70 -Djava.security.egd=file:/dev/./urandom"
 
 # Use a non-root user for security
 USER nobody
+
+EXPOSE 8081
 
 ENTRYPOINT [ "sh", "-c", "java $JAVA_OPTS -jar crediya-solicitudes.jar" ]
