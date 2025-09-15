@@ -1,7 +1,7 @@
-package com.crediya.solicitudes.r2dbc;
+package com.crediya.solicitudes.r2dbc.domain.tipoprestamo;
 
 import com.crediya.solicitudes.model.tipoprestamo.TipoPrestamo;
-import com.crediya.solicitudes.model.tipoprestamo.gateways.TipoPrestamoRepository;
+import com.crediya.solicitudes.model.tipoprestamo.gateways.TipoPrestamoRepositoryPort;
 import com.crediya.solicitudes.r2dbc.entity.TipoPrestamoData;
 import com.crediya.solicitudes.r2dbc.helper.ReactiveAdapterOperations;
 import org.reactivecommons.utils.ObjectMapper;
@@ -16,19 +16,20 @@ public class TipoPrestamoReactiveRepositoryAdapter extends ReactiveAdapterOperat
         TipoPrestamoData,
         BigInteger,
         TipoPrestamoReactiveRepository
-        > implements TipoPrestamoRepository {
+        > implements TipoPrestamoRepositoryPort {
 
     public TipoPrestamoReactiveRepositoryAdapter(TipoPrestamoReactiveRepository repository, ObjectMapper mapper) {
-        /**
-         *  Could be use mapper.mapBuilder if your domain model implement builder pattern
-         *  super(repository, mapper, d -> mapper.mapBuilder(d,ObjectModel.ObjectModelBuilder.class).build());
-         *  Or using mapper.map with the class of the object model
-         */
-        super(repository, mapper, d -> mapper.mapBuilder(d, TipoPrestamo.class));
+        super(repository, mapper, d -> mapper.map(d, TipoPrestamo.class));
     }
 
     @Override
     public Mono<Boolean> existePorId(BigInteger id) {
         return repository.existsById(id);
+    }
+
+    @Override
+    public Mono<TipoPrestamo> buscarPorId(BigInteger id) {
+        return repository.findById(id)
+                .map(this::toEntity);
     }
 }

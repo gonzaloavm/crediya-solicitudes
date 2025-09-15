@@ -1,4 +1,6 @@
 package com.crediya.solicitudes.model.solicitud;
+import com.crediya.solicitudes.model.estado.Estado;
+import com.crediya.solicitudes.model.tipoprestamo.TipoPrestamo;
 import lombok.*;
 //import lombok.NoArgsConstructor;
 
@@ -12,13 +14,11 @@ import java.time.LocalDate;
 @Builder(toBuilder = true)
 public class Solicitud {
 
-    private BigInteger id;
+    private BigInteger idSolicitud;
     private Double monto;
     private Integer plazo;
     private String documentoIdentidad;
-    private LocalDate fechaCreacion;
-    private LocalDate fechaActualizacion;
-    private BigInteger idEstado;
-    private BigInteger idTipoPrestamo;
+    private Estado estado;
+    private TipoPrestamo tipoPrestamo;
     private String usuarioExternalId;
 }

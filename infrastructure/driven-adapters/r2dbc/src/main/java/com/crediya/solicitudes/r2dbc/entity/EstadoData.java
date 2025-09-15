@@ -14,21 +14,17 @@ import java.math.BigInteger;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table("tipo_prestamo")
-public class TipoPrestamoData {
+@Table("estados")
+public class EstadoData {
 
     @Id
-    @Column("id_tipo_prestamo")
-    private BigInteger idTipoPrestamo;
+    @Column("id_estado")
+    private BigInteger idEstado;
+    @Column("cod_estado")
+    private String codEstado;
     @Column
     private String nombre;
-    @Column("monto_minimo")
-    private Double montoMinimo;
-    @Column("monto_maximo")
-    private Double montoMaximo;
-    @Column("tasa_interes")
-    private Double tasaInteres;
-    @Column("validacion_automatica")
-    private boolean validacionAutomatica;
+    @Column
+    private String descripcion;
 
 }

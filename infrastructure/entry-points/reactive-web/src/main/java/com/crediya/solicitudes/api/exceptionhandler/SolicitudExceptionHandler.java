@@ -43,4 +43,5 @@ public class SolicitudExceptionHandler {
                         .build()
         ));
     }
+
 }

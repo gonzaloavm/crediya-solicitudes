@@ -61,7 +61,7 @@ public class JwtProvider implements JwtProviderPort {
                 roles = Collections.emptyList();
             }
 
-            return Mono.just(new JwtClaims(subject, email, documentoIdentidad, roles));
+            return Mono.just(new JwtClaims(subject, email, documentoIdentidad, roles, token));
         } catch (Exception e) {
             return Mono.error(new InvalidTokenException("Token inválido o expirado"));
         }

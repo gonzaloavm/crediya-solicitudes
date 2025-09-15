@@ -20,7 +20,7 @@ public class SolicitudData {
 
     @Id
     @Column("id_solicitud")
-    private BigInteger id;
+    private BigInteger idSolicitud;
     @Column
     private Double monto;
     @Column
@@ -33,4 +33,5 @@ public class SolicitudData {
     private BigInteger idTipoPrestamo;
     @Column("usuario_external_id")
     private String usuarioExternalId;
+
 }

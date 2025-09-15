@@ -1,10 +1,11 @@
 package com.crediya.solicitudes.usecase.enviarsolicitudprestamo;
 
+import com.crediya.solicitudes.model.estado.Estado;
 import com.crediya.solicitudes.model.solicitud.exception.IdentidadNoCoincideException;
 import com.crediya.solicitudes.model.solicitud.Solicitud;
-import com.crediya.solicitudes.model.solicitud.gateways.SolicitudRepository;
+import com.crediya.solicitudes.model.solicitud.gateways.SolicitudRepositoryPort;
 import com.crediya.solicitudes.model.tipoprestamo.exception.TipoPrestamoNoEncontradoException;
-import com.crediya.solicitudes.model.tipoprestamo.gateways.TipoPrestamoRepository;
+import com.crediya.solicitudes.model.tipoprestamo.gateways.TipoPrestamoRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -14,8 +15,8 @@ import java.util.logging.Logger;
 @RequiredArgsConstructor
 public class EnviarSolicitudPrestamoUseCase {
 
-    private final SolicitudRepository solicitudRepository;
-    private final TipoPrestamoRepository tipoPrestamoRepository;
+    private final SolicitudRepositoryPort solicitudRepository;
+    private final TipoPrestamoRepositoryPort tipoPrestamoRepository;
     private static final Logger logger = Logger.getLogger(EnviarSolicitudPrestamoUseCase.class.getName());
 
     public Mono<Void> enviar(Solicitud solicitud, String documentoIdentidadJWT, String usuarioExternalIdJWT) {
@@ -29,9 +30,15 @@ public class EnviarSolicitudPrestamoUseCase {
     //region CONFIGURACION DE SOLICITUD
 
     private Mono<Solicitud> asignarEstadoInicial(Solicitud solicitud) {
+
+        // El objeto Estado representa el concepto de negocio
+        Estado estadoPendiente = Estado.builder()
+                .idEstado(BigInteger.valueOf(1))
+                .build();
+
         return Mono.just(solicitud)
                 .map(s -> {
-                    s.setIdEstado(BigInteger.valueOf(1)); // Estado "Pendiente de revisión"
+                    s.setEstado(estadoPendiente); // Estado "Pendiente de revisión"
                     return s;
                 });
     }
@@ -55,12 +62,12 @@ public class EnviarSolicitudPrestamoUseCase {
     }
 
     private Mono<Solicitud> validarTipoPrestamoExistente(Solicitud solicitud) {
-        return tipoPrestamoRepository.existePorId(solicitud.getIdTipoPrestamo())
+        return tipoPrestamoRepository.existePorId(solicitud.getTipoPrestamo().getIdTipoPrestamo())
                 .flatMap(existe -> {
                     if (Boolean.TRUE.equals(existe)) {
                         return Mono.just(solicitud);
                     } else {
-                        logger.warning("Tipo de préstamo no encontrado: id=" + solicitud.getIdTipoPrestamo());
+                        logger.warning("Tipo de préstamo no encontrado: id=" + solicitud.getTipoPrestamo().getIdTipoPrestamo());
                         return Mono.error(new TipoPrestamoNoEncontradoException("El tipo de préstamo no existe."));
                     }
                 });

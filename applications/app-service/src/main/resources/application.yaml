@@ -21,6 +21,8 @@ spring:
       health:
         probes:
           enabled: true
+  zipkin:
+    enabled: false
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8081"
 adapters:
@@ -36,3 +38,6 @@ springdoc:
     title: API de Solicitudes de CrediYa
     version: 1.0
     description: API para la gestión de usuarios y autenticación del sistema.
+microservices:
+  autenticacion:
+    url: http://localhost:8080

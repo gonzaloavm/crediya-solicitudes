@@ -1,4 +1,4 @@
-package com.crediya.solicitudes.r2dbc;
+package com.crediya.solicitudes.r2dbc.domain.tipoprestamo;
 
 import com.crediya.solicitudes.r2dbc.entity.TipoPrestamoData;
 import org.springframework.data.repository.query.ReactiveQueryByExampleExecutor;

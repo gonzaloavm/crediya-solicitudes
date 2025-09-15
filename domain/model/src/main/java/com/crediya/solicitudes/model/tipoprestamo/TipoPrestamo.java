@@ -10,7 +10,6 @@ import java.math.BigInteger;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class TipoPrestamo {
-
     private BigInteger idTipoPrestamo;
     private String nombre;
     private Double montoMinimo;
