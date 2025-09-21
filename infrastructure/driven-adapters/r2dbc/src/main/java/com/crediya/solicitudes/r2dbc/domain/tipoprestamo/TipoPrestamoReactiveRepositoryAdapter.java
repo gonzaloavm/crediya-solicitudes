@@ -28,8 +28,19 @@ public class TipoPrestamoReactiveRepositoryAdapter extends ReactiveAdapterOperat
     }
 
     @Override
+    public Mono<Boolean> existePorPublicId(byte[] publicId) {
+        return repository.existsByPublicTipoPrestamoId(publicId);
+    }
+
+    @Override
     public Mono<TipoPrestamo> buscarPorId(BigInteger id) {
         return repository.findById(id)
+                .map(this::toEntity);
+    }
+
+    @Override
+    public Mono<TipoPrestamo> buscarPorPublicTipoPrestamoId(byte[] id) {
+        return repository.findByPublicTipoPrestamoId(id)
                 .map(this::toEntity);
     }
 }

@@ -14,12 +14,14 @@ import java.math.BigInteger;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table("tipo_prestamo")
+@Table("tipos_prestamo")
 public class TipoPrestamoData {
 
     @Id
-    @Column("id_tipo_prestamo")
-    private BigInteger idTipoPrestamo;
+    @Column("tipo_prestamo_id")
+    private BigInteger tipoPrestamoId;
+    @Column("public_tipo_prestamo_id")
+    private byte[] publicTipoPrestamoId;
     @Column
     private String nombre;
     @Column("monto_minimo")

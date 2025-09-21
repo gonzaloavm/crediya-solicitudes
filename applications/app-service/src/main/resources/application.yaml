@@ -10,8 +10,8 @@ spring:
     console:
       enabled: true
       path: /h2
-  profiles:
-    active: docker
+#  profiles:
+#    active: docker
   management:
     endpoints:
       web:
@@ -31,7 +31,7 @@ adapters:
       host: localhost
       port: 3306
       database: solicitudes
-      username: admin
+      username: sa
       password: 5697964c
 environment:
   SPRING_PROFILES_ACTIVE: docker

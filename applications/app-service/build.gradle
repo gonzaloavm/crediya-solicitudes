@@ -2,6 +2,7 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'jacoco'
 
 dependencies {
+	implementation project(':uuid')
 	implementation project(':microservices-client')
 	implementation project(':jwt-provider')
 	implementation project(':security')

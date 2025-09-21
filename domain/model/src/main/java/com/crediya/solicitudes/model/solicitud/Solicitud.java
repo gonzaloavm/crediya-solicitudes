@@ -5,16 +5,17 @@ import lombok.*;
 //import lombok.NoArgsConstructor;
 
 import java.math.BigInteger;
-import java.time.LocalDate;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
+@ToString
 public class Solicitud {
 
-    private BigInteger idSolicitud;
+    private BigInteger solicitudId;
+    private byte[] publicSolicitudId;
     private Double monto;
     private Integer plazo;
     private String documentoIdentidad;

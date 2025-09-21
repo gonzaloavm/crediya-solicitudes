@@ -7,5 +7,7 @@ import java.math.BigInteger;
 
 public interface TipoPrestamoRepositoryPort {
     Mono<Boolean> existePorId(BigInteger id);
+    Mono<Boolean> existePorPublicId(byte[] publicId);
     Mono<TipoPrestamo> buscarPorId(BigInteger id);
+    Mono<TipoPrestamo> buscarPorPublicTipoPrestamoId(byte[] publicId);
 }

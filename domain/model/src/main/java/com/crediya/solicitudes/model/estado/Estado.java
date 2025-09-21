@@ -9,7 +9,8 @@ import java.math.BigInteger;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class Estado {
-    private BigInteger idEstado;
+    private BigInteger estadoId;
+    private byte[] publicEstadoId;
     private String codEstado;
     private String nombre;
     private String descripcion;

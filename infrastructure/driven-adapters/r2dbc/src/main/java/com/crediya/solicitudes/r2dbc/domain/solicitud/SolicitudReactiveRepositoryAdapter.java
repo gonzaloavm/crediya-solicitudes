@@ -29,8 +29,8 @@ public class SolicitudReactiveRepositoryAdapter extends ReactiveAdapterOperation
     @Override
     public Mono<Void> guardar(Solicitud usuario) {
         SolicitudData data = toData(usuario);
-        data.setIdEstado(usuario.getEstado().getIdEstado());
-        data.setIdTipoPrestamo(usuario.getTipoPrestamo().getIdTipoPrestamo());
+        data.setEstadoId(usuario.getEstado().getEstadoId());
+        data.setTipoPrestamoId(usuario.getTipoPrestamo().getTipoPrestamoId());
         return repository.save(data).then();
     }
 
@@ -39,41 +39,37 @@ public class SolicitudReactiveRepositoryAdapter extends ReactiveAdapterOperation
         return super.findAll();
     }
 
-//    @Override
-//    public Flux<Solicitud> buscarPorIdEstadosPaginado(List<BigInteger> idEstados, int page, int size) {
-//        return repository.findByIdEstadoIn(idEstados)
-//                .map(data -> Solicitud.builder()
-//                        .idSolicitud(data.getIdSolicitud())
-//                        .monto(data.getMonto())
-//                        .plazo(data.getPlazo())
-//                        .documentoIdentidad(data.getDocumentoIdentidad())
-//                        .estado(Estado.builder()
-//                                .idEstado(data.getIdEstado())
-//                                .build())
-//                        .tipoPrestamo(TipoPrestamo.builder()
-//                                .idTipoPrestamo(data.getIdTipoPrestamo())
-//                                .build())
-//                        .usuarioExternalId(data.getUsuarioExternalId())
-//                        .build());
-//    }
-
     @Override
     public Flux<Solicitud> buscarPorIdEstadosPaginado(List<BigInteger> idEstados, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("idSolicitud").descending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("solicitudId").descending());
 
-        return repository.findByIdEstadoIn(idEstados, pageable)
+        return repository.findByEstadoIdIn(idEstados, pageable)
                 .map(data -> Solicitud.builder()
-                        .idSolicitud(data.getIdSolicitud())
+                        .solicitudId(data.getSolicitudId())
                         .monto(data.getMonto())
                         .plazo(data.getPlazo())
                         .documentoIdentidad(data.getDocumentoIdentidad())
                         .estado(Estado.builder()
-                                .idEstado(data.getIdEstado())
+                                .estadoId(data.getEstadoId())
                                 .build())
                         .tipoPrestamo(TipoPrestamo.builder()
-                                .idTipoPrestamo(data.getIdTipoPrestamo())
+                                .tipoPrestamoId(data.getTipoPrestamoId())
                                 .build())
                         .usuarioExternalId(data.getUsuarioExternalId())
                         .build());
+    }
+
+    @Override
+    public Mono<Void> actualizarEstado(Solicitud solicitud) {
+        return repository.actualizarIdEstado(
+                        solicitud.getSolicitudId(),
+                        solicitud.getEstado().getEstadoId()
+                )
+                .flatMap(rows -> {
+                    if (rows == 0) {
+                        return Mono.error(new IllegalStateException("No se encontró la solicitud con ID: " + solicitud.getSolicitudId()));
+                    }
+                    return Mono.empty();
+                });
     }
 }

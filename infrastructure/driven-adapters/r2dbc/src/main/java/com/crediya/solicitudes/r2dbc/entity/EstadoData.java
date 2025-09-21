@@ -18,8 +18,10 @@ import java.math.BigInteger;
 public class EstadoData {
 
     @Id
-    @Column("id_estado")
-    private BigInteger idEstado;
+    @Column("estado_id")
+    private BigInteger estadoId;
+    @Column("public_estado_id")
+    private byte[] publicestadoId;
     @Column("cod_estado")
     private String codEstado;
     @Column

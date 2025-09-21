@@ -32,3 +32,5 @@ include ':jwt-provider'
 project(':jwt-provider').projectDir = file('./infrastructure/driven-adapters/jwt-provider')
 include ':microservices-client'
 project(':microservices-client').projectDir = file('./infrastructure/driven-adapters/microservices-client')
+include ':uuid'
+project(':uuid').projectDir = file('./infrastructure/helpers/uuid')

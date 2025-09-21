@@ -40,12 +40,12 @@ public class ListarSolicitudParaRevisionUseCase {
 
     private Mono<SolicitudCompleta> procesarSolicitudIndividual(Solicitud solicitud, String token) {
         return Mono.zip(
-                estadoRepositoryPort.buscarPorId(solicitud.getEstado().getIdEstado())
+                estadoRepositoryPort.buscarPorId(solicitud.getEstado().getEstadoId())
                         .onErrorResume(e -> {
                             log.warning("Error obteniendo estado: " + e.getMessage());
                             return Mono.just(new Estado()); // Estado por defecto
                         }),
-                tipoPrestamoRepositoryPort.buscarPorId(solicitud.getTipoPrestamo().getIdTipoPrestamo())
+                tipoPrestamoRepositoryPort.buscarPorId(solicitud.getTipoPrestamo().getTipoPrestamoId())
                         .onErrorResume(e -> {
                             log.warning("Error obteniendo tipo préstamo: " + e.getMessage());
                             return Mono.just(new TipoPrestamo()); // Tipo préstamo por defecto

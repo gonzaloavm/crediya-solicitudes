@@ -1,11 +1,13 @@
 package com.crediya.solicitudes.api;
 
 import com.crediya.solicitudes.api.dto.api.ApiResult;
-import com.crediya.solicitudes.api.dto.solicitante.SolicitudRequest;
+import com.crediya.solicitudes.api.dto.solicitante.ActualizarEstadoSolicitanteRequest;
+import com.crediya.solicitudes.api.dto.solicitante.CrearSolicitudRequest;
 import com.crediya.solicitudes.api.mapper.SolicitudMapper;
 import com.crediya.solicitudes.dto.JwtClaims;
 import com.crediya.solicitudes.dto.SolicitudCompleta;
 import com.crediya.solicitudes.model.solicitud.Solicitud;
+import com.crediya.solicitudes.transactional.TransactionalActualizarEstadoSolicitudPrestamo;
 import com.crediya.solicitudes.transactional.TransactionalEnviarSolicitudPrestamo;
 import com.crediya.solicitudes.usecase.listarsolicitudpararevision.ListarSolicitudParaRevisionUseCase;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,6 +34,7 @@ public class SolicitudesController {
     private static final Logger log = LoggerFactory.getLogger(SolicitudesController.class);
 
     private final TransactionalEnviarSolicitudPrestamo transactionalEnviarSolicitudPrestamo;
+    private final TransactionalActualizarEstadoSolicitudPrestamo transactionalActualizarEstadoSolicitudPrestamo;
     private final ListarSolicitudParaRevisionUseCase listarSolicitudParaRevisionUseCase;
     private final SolicitudMapper solicitudMapper;
 
@@ -46,11 +49,12 @@ public class SolicitudesController {
     })
     @PreAuthorize("hasAnyRole('CLIENTE')")
     public Mono<ResponseEntity<ApiResult<Void>>> enviarSolicitud(
-            @RequestBody SolicitudRequest solicitudRequest,
+            @RequestBody CrearSolicitudRequest crearSolicitudRequest,
             @AuthenticationPrincipal JwtClaims userClaims) {
-        log.info("Iniciando envío de solicitud. documentoIdentidad={}", solicitudRequest.documentoIdentidad());
+        log.info("Iniciando envío de solicitud. documentoIdentidad={}", crearSolicitudRequest.documentoIdentidad());
 
-        Solicitud solicitud = solicitudMapper.toModel(solicitudRequest);
+        Solicitud solicitud = solicitudMapper.toModel(crearSolicitudRequest);
+        System.out.println(solicitud);
         String documentoIdentidad = userClaims.documentoIdentidad();
         String usuarioExternalId = userClaims.sub();
 
@@ -88,6 +92,35 @@ public class SolicitudesController {
                                 .code(HttpStatus.OK.value())
                                 .message("Solicitudes obtenidas correctamente")
                                 .data(solicitudes)
+                                .build()
+                ));
+    }
+
+    @PutMapping("/{idSolicitud}/estado")
+    @Operation(
+            summary = "Actualizar el estado de una solicitud",
+            description = "Actualizar el estado de una solicitud.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Estado de la solicitud de préstamo actualizada con éxito"),
+            @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos (ej. campos obligatorios vacíos)"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
+    @PreAuthorize("hasAnyRole('CLIENTE')")
+    public Mono<ResponseEntity<ApiResult<Void>>> actualizarEstadoSolicitud(
+            @PathVariable BigInteger idSolicitud,
+            @RequestBody ActualizarEstadoSolicitanteRequest actualizarEstadoSolicitanteRequest) {
+        log.info("Iniciando actualizacion solicitud idSolicitud={}", idSolicitud);
+
+        Solicitud solicitud = solicitudMapper.toModel(actualizarEstadoSolicitanteRequest);
+        solicitud.setSolicitudId(idSolicitud);
+
+        return transactionalActualizarEstadoSolicitudPrestamo.actualizarEstado(solicitud)
+                .doOnSuccess(v -> log.info("Solicitud Actualizada Exitosamente {}", ""))
+                .thenReturn(ResponseEntity.status(201).body(
+                        ApiResult.<Void>builder()
+                                .success(true)
+                                .code(HttpStatus.CREATED.value())
+                                .message("Solicitud actualizada con éxito")
                                 .build()
                 ));
     }

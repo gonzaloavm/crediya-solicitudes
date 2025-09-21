@@ -1,24 +1,35 @@
 package com.crediya.solicitudes.api.mapper;
 
-import com.crediya.solicitudes.api.dto.solicitante.SolicitudRequest;
+import com.crediya.solicitudes.api.dto.solicitante.ActualizarEstadoSolicitanteRequest;
+import com.crediya.solicitudes.api.dto.solicitante.CrearSolicitudRequest;
 import com.crediya.solicitudes.model.solicitud.Solicitud;
 import com.crediya.solicitudes.model.tipoprestamo.TipoPrestamo;
+import com.crediya.solicitudes.ports.UuidProviderPort;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigInteger;
 
 @Mapper(componentModel = "spring")
-public interface SolicitudMapper {
+public abstract class SolicitudMapper {
 
-    @Mapping(target = "idSolicitud", ignore = true)
+    @Autowired
+    protected UuidProviderPort uuidProvider;
+
+    @Mapping(target = "solicitudId", ignore = true)
     @Mapping(target = "estado", ignore = true)
-    @Mapping(target = "tipoPrestamo", expression = "java(mapTipoPrestamo(solicitudRequest.idTipoPrestamo()))")
-    Solicitud toModel(SolicitudRequest solicitudRequest);
+    @Mapping(target = "tipoPrestamo", source="tipoPrestamoId")
+    public abstract Solicitud toModel(CrearSolicitudRequest crearSolicitudRequest);
 
-    default TipoPrestamo mapTipoPrestamo(Long idTipoPrestamo) {
+    @Mapping(target = "solicitudId", ignore = true)
+    @Mapping(target = "estado", ignore = true)
+    @Mapping(target = "estado.codEstado", source = "codEstado")
+    public abstract Solicitud toModel(ActualizarEstadoSolicitanteRequest actualizarEstadoSolicitanteRequest);
+
+    protected TipoPrestamo map(String idTipoPrestamo) {
         return TipoPrestamo.builder()
-                .idTipoPrestamo(BigInteger.valueOf(idTipoPrestamo))
+                .publicTipoPrestamoId(uuidProvider.fromString(idTipoPrestamo))
                 .build();
     }
 }
