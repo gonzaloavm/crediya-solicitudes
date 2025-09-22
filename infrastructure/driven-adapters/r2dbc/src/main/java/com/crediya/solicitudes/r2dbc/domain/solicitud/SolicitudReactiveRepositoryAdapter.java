@@ -7,6 +7,8 @@ import com.crediya.solicitudes.model.tipoprestamo.TipoPrestamo;
 import com.crediya.solicitudes.r2dbc.entity.SolicitudData;
 import com.crediya.solicitudes.r2dbc.helper.ReactiveAdapterOperations;
 import org.reactivecommons.utils.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -19,6 +21,8 @@ import java.util.List;
 
 @Repository
 public class SolicitudReactiveRepositoryAdapter extends ReactiveAdapterOperations<Solicitud, SolicitudData, BigInteger, SolicitudReactiveRepository> implements SolicitudRepositoryPort {
+
+    private static final Logger log = LoggerFactory.getLogger(SolicitudReactiveRepositoryAdapter.class);
 
     public SolicitudReactiveRepositoryAdapter(
             SolicitudReactiveRepository repository,
@@ -35,8 +39,9 @@ public class SolicitudReactiveRepositoryAdapter extends ReactiveAdapterOperation
     }
 
     @Override
-    public Flux<Solicitud> buscarTodos() {
-        return super.findAll();
+    public Mono<Solicitud> buscarPorPublicId(byte[] publicId) {
+        return repository.findByPublicSolicitudId(publicId).
+                map(this::toEntity);
     }
 
     @Override
@@ -45,6 +50,7 @@ public class SolicitudReactiveRepositoryAdapter extends ReactiveAdapterOperation
 
         return repository.findByEstadoIdIn(idEstados, pageable)
                 .map(data -> Solicitud.builder()
+                        .publicSolicitudId(data.getPublicSolicitudId())
                         .solicitudId(data.getSolicitudId())
                         .monto(data.getMonto())
                         .plazo(data.getPlazo())
@@ -61,13 +67,16 @@ public class SolicitudReactiveRepositoryAdapter extends ReactiveAdapterOperation
 
     @Override
     public Mono<Void> actualizarEstado(Solicitud solicitud) {
+
+        log.info("Estado recuperado: solicitudId={}, estadoId={}", solicitud.getSolicitudId(), solicitud.getEstado().getEstadoId());
+
         return repository.actualizarIdEstado(
                         solicitud.getSolicitudId(),
                         solicitud.getEstado().getEstadoId()
                 )
                 .flatMap(rows -> {
                     if (rows == 0) {
-                        return Mono.error(new IllegalStateException("No se encontró la solicitud con ID: " + solicitud.getSolicitudId()));
+                        return Mono.error(new IllegalStateException("No se encontró la solicitud con ID: " + solicitud.getSolicitudId() + " para actualizar estado " + solicitud.getEstado().getEstadoId()));
                     }
                     return Mono.empty();
                 });

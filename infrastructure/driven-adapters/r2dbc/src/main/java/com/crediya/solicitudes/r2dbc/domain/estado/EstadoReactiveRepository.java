@@ -8,5 +8,5 @@ import reactor.core.publisher.Mono;
 import java.math.BigInteger;
 
 public interface EstadoReactiveRepository extends ReactiveCrudRepository<EstadoData, BigInteger>, ReactiveQueryByExampleExecutor<EstadoData> {
-    Mono<EstadoData> findByCodEstado(String codEstado);
+    Mono<EstadoData> findByPublicEstadoId(byte[] codEstado);
 }

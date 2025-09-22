@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface SolicitudRepositoryPort {
     Mono<Void> guardar(Solicitud solicitud);
-    Flux<Solicitud> buscarTodos();
+    Mono<Solicitud> buscarPorPublicId(byte[] publicId);
     Flux<Solicitud> buscarPorIdEstadosPaginado(List<BigInteger> idEstados, int page, int size);
     Mono<Void> actualizarEstado(Solicitud solicitud);
 }

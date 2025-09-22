@@ -4,5 +4,5 @@ import jakarta.validation.constraints.NotBlank;
 
 public record ActualizarEstadoSolicitanteRequest(
         @NotBlank(message = "El codigo del estado no puede ser nulo")
-        String codEstado
+        String estadoId
 ) {}

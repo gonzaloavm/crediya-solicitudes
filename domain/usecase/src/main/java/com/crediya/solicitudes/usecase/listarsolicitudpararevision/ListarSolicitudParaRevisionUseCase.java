@@ -10,12 +10,14 @@ import com.crediya.solicitudes.model.solicitud.gateways.SolicitudRepositoryPort;
 import com.crediya.solicitudes.model.tipoprestamo.TipoPrestamo;
 import com.crediya.solicitudes.model.tipoprestamo.gateways.TipoPrestamoRepositoryPort;
 import com.crediya.solicitudes.ports.AutenticacionServiceClientPort;
+import com.crediya.solicitudes.ports.UuidProviderPort;
 import com.crediya.solicitudes.usecase.enviarsolicitudprestamo.EnviarSolicitudPrestamoUseCase;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -26,6 +28,7 @@ public class ListarSolicitudParaRevisionUseCase {
     private final EstadoRepositoryPort estadoRepositoryPort;
     private final TipoPrestamoRepositoryPort tipoPrestamoRepositoryPort;
     private final AutenticacionServiceClientPort autenticacionServiceClientPort;
+    private final UuidProviderPort uuidProvider;
 
     private static final Logger log = Logger.getLogger(EnviarSolicitudPrestamoUseCase.class.getName());
 
@@ -88,6 +91,7 @@ public class ListarSolicitudParaRevisionUseCase {
         // Manejar caso donde usuarioInfo es null
         if (usuarioInfo == null) {
             return new SolicitudCompleta(
+                    uuidProvider.toString(solicitud.getPublicSolicitudId()),
                     solicitud.getMonto(),
                     solicitud.getPlazo(),
                     "Email no disponible",
@@ -108,6 +112,7 @@ public class ListarSolicitudParaRevisionUseCase {
         double cuotaMensual = cuotaBase + interesMensual;
 
         return new SolicitudCompleta(
+                uuidProvider.toString(solicitud.getPublicSolicitudId()),
                 solicitud.getMonto(),
                 solicitud.getPlazo(),
                 usuarioInfo.email(),

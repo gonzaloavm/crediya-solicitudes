@@ -7,6 +7,7 @@ import com.crediya.solicitudes.api.mapper.SolicitudMapper;
 import com.crediya.solicitudes.dto.JwtClaims;
 import com.crediya.solicitudes.dto.SolicitudCompleta;
 import com.crediya.solicitudes.model.solicitud.Solicitud;
+import com.crediya.solicitudes.ports.UuidProviderPort;
 import com.crediya.solicitudes.transactional.TransactionalActualizarEstadoSolicitudPrestamo;
 import com.crediya.solicitudes.transactional.TransactionalEnviarSolicitudPrestamo;
 import com.crediya.solicitudes.usecase.listarsolicitudpararevision.ListarSolicitudParaRevisionUseCase;
@@ -37,6 +38,7 @@ public class SolicitudesController {
     private final TransactionalActualizarEstadoSolicitudPrestamo transactionalActualizarEstadoSolicitudPrestamo;
     private final ListarSolicitudParaRevisionUseCase listarSolicitudParaRevisionUseCase;
     private final SolicitudMapper solicitudMapper;
+    private final UuidProviderPort uuidProvider;
 
     @PostMapping
     @Operation(
@@ -96,7 +98,7 @@ public class SolicitudesController {
                 ));
     }
 
-    @PutMapping("/{idSolicitud}/estado")
+    @PutMapping("/{solicitudId}/estado")
     @Operation(
             summary = "Actualizar el estado de una solicitud",
             description = "Actualizar el estado de una solicitud.")
@@ -105,14 +107,14 @@ public class SolicitudesController {
             @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos (ej. campos obligatorios vacíos)"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
-    @PreAuthorize("hasAnyRole('CLIENTE')")
+    @PreAuthorize("hasAnyRole('ASESOR')")
     public Mono<ResponseEntity<ApiResult<Void>>> actualizarEstadoSolicitud(
-            @PathVariable BigInteger idSolicitud,
+            @PathVariable("solicitudId") String solicitudId,
             @RequestBody ActualizarEstadoSolicitanteRequest actualizarEstadoSolicitanteRequest) {
-        log.info("Iniciando actualizacion solicitud idSolicitud={}", idSolicitud);
+        log.info("Iniciando actualizacion solicitud idSolicitud={}", solicitudId);
 
         Solicitud solicitud = solicitudMapper.toModel(actualizarEstadoSolicitanteRequest);
-        solicitud.setSolicitudId(idSolicitud);
+        solicitud.setPublicSolicitudId(uuidProvider.fromString(solicitudId));
 
         return transactionalActualizarEstadoSolicitudPrestamo.actualizarEstado(solicitud)
                 .doOnSuccess(v -> log.info("Solicitud Actualizada Exitosamente {}", ""))
@@ -124,6 +126,4 @@ public class SolicitudesController {
                                 .build()
                 ));
     }
-
-
 }

@@ -25,7 +25,7 @@ public class EstadoReactiveRepositoryAdapter extends ReactiveAdapterOperations<E
     }
 
     @Override
-    public Mono<Estado> buscarPorCodigo(String codEstado) {
-        return this.repository.findByCodEstado(codEstado).map(this::toEntity);
+    public Mono<Estado> buscarPorPublicId(byte[] publicId) {
+        return this.repository.findByPublicEstadoId(publicId).map(this::toEntity);
     }
 }

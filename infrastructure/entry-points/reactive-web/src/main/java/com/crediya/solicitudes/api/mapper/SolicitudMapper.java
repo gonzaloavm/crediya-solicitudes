@@ -2,6 +2,7 @@ package com.crediya.solicitudes.api.mapper;
 
 import com.crediya.solicitudes.api.dto.solicitante.ActualizarEstadoSolicitanteRequest;
 import com.crediya.solicitudes.api.dto.solicitante.CrearSolicitudRequest;
+import com.crediya.solicitudes.model.estado.Estado;
 import com.crediya.solicitudes.model.solicitud.Solicitud;
 import com.crediya.solicitudes.model.tipoprestamo.TipoPrestamo;
 import com.crediya.solicitudes.ports.UuidProviderPort;
@@ -22,14 +23,18 @@ public abstract class SolicitudMapper {
     @Mapping(target = "tipoPrestamo", source="tipoPrestamoId")
     public abstract Solicitud toModel(CrearSolicitudRequest crearSolicitudRequest);
 
-    @Mapping(target = "solicitudId", ignore = true)
-    @Mapping(target = "estado", ignore = true)
-    @Mapping(target = "estado.codEstado", source = "codEstado")
+    @Mapping(target = "estado", source = "estadoId")
     public abstract Solicitud toModel(ActualizarEstadoSolicitanteRequest actualizarEstadoSolicitanteRequest);
 
-    protected TipoPrestamo map(String idTipoPrestamo) {
+    protected TipoPrestamo mapIdToTipoPrestamo(String tipoPrestamoId) {
         return TipoPrestamo.builder()
-                .publicTipoPrestamoId(uuidProvider.fromString(idTipoPrestamo))
+                .publicTipoPrestamoId(uuidProvider.fromString(tipoPrestamoId))
+                .build();
+    }
+
+    protected Estado mapIdToEstado(String estadoId) {
+        return Estado.builder()
+                .publicEstadoId(uuidProvider.fromString(estadoId))
                 .build();
     }
 }

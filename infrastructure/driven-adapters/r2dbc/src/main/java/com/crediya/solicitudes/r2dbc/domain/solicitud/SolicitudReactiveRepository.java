@@ -16,13 +16,14 @@ public interface SolicitudReactiveRepository extends ReactiveCrudRepository<Soli
 
     Flux<SolicitudData> findByEstadoIdIn(List<BigInteger> idEstados, Pageable pageable);
 
-    @Modifying
     @Query(
         """
-            UPDATE solicitud
+            UPDATE solicitudes
             SET estado_id = :estadoId
-            WHERE solicitud_id = :solicitud_id
+            WHERE solicitud_id = :solicitudId
         """
     )
     Mono<Integer> actualizarIdEstado(BigInteger solicitudId, BigInteger estadoId);
+
+    Mono<SolicitudData> findByPublicSolicitudId(byte[] publicId);
 }

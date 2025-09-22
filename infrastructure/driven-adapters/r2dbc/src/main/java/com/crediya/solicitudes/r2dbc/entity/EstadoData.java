@@ -21,7 +21,7 @@ public class EstadoData {
     @Column("estado_id")
     private BigInteger estadoId;
     @Column("public_estado_id")
-    private byte[] publicestadoId;
+    private byte[] publicEstadoId;
     @Column("cod_estado")
     private String codEstado;
     @Column

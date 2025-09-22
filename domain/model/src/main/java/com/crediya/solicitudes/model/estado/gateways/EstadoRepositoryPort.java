@@ -7,5 +7,5 @@ import java.math.BigInteger;
 
 public interface EstadoRepositoryPort {
     Mono<Estado> buscarPorId(BigInteger id);
-    Mono<Estado> buscarPorCodigo(String codEstado);
+    Mono<Estado> buscarPorPublicId(byte[] publicId);
 }
