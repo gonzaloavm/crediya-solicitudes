@@ -1,10 +1,11 @@
 package com.crediya.solicitudes.usecase.enviarsolicitudprestamo;
 
+import com.crediya.solicitudes.error.ErrorCode;
+import com.crediya.solicitudes.exception.BusinessRuleException;
+import com.crediya.solicitudes.exception.DomainNotFoundException;
 import com.crediya.solicitudes.model.estado.Estado;
-import com.crediya.solicitudes.model.solicitud.exception.IdentidadNoCoincideException;
 import com.crediya.solicitudes.model.solicitud.Solicitud;
 import com.crediya.solicitudes.model.solicitud.gateways.SolicitudRepositoryPort;
-import com.crediya.solicitudes.model.tipoprestamo.exception.TipoPrestamoNoEncontradoException;
 import com.crediya.solicitudes.model.tipoprestamo.gateways.TipoPrestamoRepositoryPort;
 import com.crediya.solicitudes.ports.UuidProviderPort;
 import lombok.RequiredArgsConstructor;
@@ -60,7 +61,7 @@ public class EnviarSolicitudPrestamoUseCase {
         if (!coincideDocumento || !coincideExternalId) {
             logger.fine("Validación de integridad fallida: documentoIdentidad=" +
                     solicitud.getDocumentoIdentidad() + ", usuarioExternalId=" + solicitud.getUsuarioExternalId());
-            return Mono.error(new IdentidadNoCoincideException("Los datos del JWT no coinciden con la solicitud enviada."));
+            return Mono.error(new BusinessRuleException(ErrorCode.UNAUTHORIZED_ACCESS, "Los datos del JWT no coinciden con la solicitud enviada."));
         }
 
         return Mono.just(solicitud);
@@ -73,7 +74,7 @@ public class EnviarSolicitudPrestamoUseCase {
                         return Mono.just(solicitud);
                     } else {
                         logger.warning("Tipo de préstamo no encontrado: id=" + solicitud.getTipoPrestamo().getTipoPrestamoId());
-                        return Mono.error(new TipoPrestamoNoEncontradoException("El tipo de préstamo no existe."));
+                        return Mono.error(new DomainNotFoundException(ErrorCode.RESOURCE_NOT_FOUND, "El tipo de préstamo no existe."));
                     }
                 });
     }

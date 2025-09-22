@@ -1,6 +1,10 @@
 package com.crediya.solicitudes.api.exceptionhandler;
 
 import com.crediya.solicitudes.api.dto.api.ApiResult;
+import com.crediya.solicitudes.api.dto.api.ErrorResult;
+import com.crediya.solicitudes.error.ErrorCode;
+import com.crediya.solicitudes.exception.DomainException;
+import com.crediya.solicitudes.exceptions.UseCaseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
@@ -20,73 +24,94 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    @ExceptionHandler(DomainException.class)
+    public Mono<ResponseEntity<ErrorResult>> handleDomainException(DomainException ex) {
+        return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                ErrorResult.builder()
+                        .status(HttpStatus.BAD_REQUEST.value())
+                        .errorCode(ex.getErrorCode().getCode())
+                        .title(ex.getErrorCode().getTitle())
+                        .detail(ex.getMessage())
+                        .build()
+        ));
+    }
+
+    @ExceptionHandler(UseCaseException.class)
+    public Mono<ResponseEntity<ErrorResult>> handleUsecaseException(UseCaseException ex) {
+        return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                ErrorResult.builder()
+                        .status(HttpStatus.BAD_REQUEST.value())
+                        .errorCode(ex.getErrorCode().getCode())
+                        .title(ex.getErrorCode().getTitle())
+                        .detail(ex.getMessage())
+                        .build()
+        ));
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public Mono<ResponseEntity<ApiResult<Void>>> handleRolInvalido(HttpMessageNotReadableException ex) {
+    public Mono<ResponseEntity<ErrorResult>> handleRolInvalido(HttpMessageNotReadableException ex) {
 
         // Obtener la causa raíz
         Throwable rootCause = getRootCause(ex);
 
         log.warn("Error de deserialización de JSON: {}", rootCause.getMessage());
 
-        String mensajeUsuario = "JSON inválido o tipos de datos incorrectos. "
-                + "Verifique que los campos enviados coincidan con el formato esperado.";
-
         return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                ApiResult.<Void>builder()
-                        .success(false)
-                        .code(HttpStatus.BAD_REQUEST.value())
-                        .message(mensajeUsuario)
+                ErrorResult.builder()
+                        .status(HttpStatus.BAD_REQUEST.value())
+                        .errorCode(ErrorCode.SERVICE_ERROR.getCode())
+                        .title(ErrorCode.SERVICE_ERROR.getTitle())
+                        .detail("JSON inválido o tipos de datos incorrectos. Verifique que los campos enviados coincidan con el formato esperado.")
                         .build()
         ));
     }
 
     @ExceptionHandler(ServerWebInputException.class)
-    public Mono<ResponseEntity<ApiResult<Void>>> handleInvalidJson(ServerWebInputException ex) {
+    public Mono<ResponseEntity<ErrorResult>> handleInvalidJson(ServerWebInputException ex) {
 
         // Obtener la causa raíz
         Throwable rootCause = getRootCause(ex);
 
         log.warn("Error al leer el body de la petición HTTP: {}", rootCause.getMessage());
 
-        String mensajeUsuario = "JSON inválido o tipos de datos incorrectos. "
-                + "Verifique que los campos enviados coincidan con el formato esperado. ";
-
         return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                ApiResult.<Void>builder()
-                        .success(false)
-                        .code(HttpStatus.BAD_REQUEST.value())
-                        .message(mensajeUsuario)
+                ErrorResult.builder()
+                        .status(HttpStatus.BAD_REQUEST.value())
+                        .errorCode(ErrorCode.SERVICE_ERROR.getCode())
+                        .title(ErrorCode.SERVICE_ERROR.getTitle())
+                        .detail("JSON inválido o tipos de datos incorrectos. Verifique que los campos enviados coincidan con el formato esperado. ")
+                        .build()
+        ));
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public Mono<ResponseEntity<ErrorResult>> handleAuthorizationDenied(AuthorizationDeniedException ex) {
+        log.warn("Acceso denegado: {}", ex.getMessage());
+
+        return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                ErrorResult.builder()
+                        .status(HttpStatus.FORBIDDEN.value())
+                        .errorCode(ErrorCode.SERVICE_ERROR.getCode())
+                        .title(ErrorCode.SERVICE_ERROR.getTitle())
+                        .detail("No tienes permisos para realizar esta acción.")
                         .build()
         ));
     }
 
     // Handler para excepciones genéricas no manejadas
     @ExceptionHandler(Exception.class)
-    public Mono<ResponseEntity<ApiResult<Void>>> handleGenericException(Exception ex) {
+    public Mono<ResponseEntity<ErrorResult>> handleGenericException(Exception ex) {
         log.error("Ha ocurrido un error inesperado: ", ex);
         return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                ApiResult.<Void>builder()
-                        .success(false)
-                        .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                        .message("Ha ocurrido un error inesperado. Por favor, inténtelo de nuevo más tarde.")
+                ErrorResult.builder()
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                        .errorCode(ErrorCode.SERVICE_ERROR.getCode())
+                        .title(ErrorCode.SERVICE_ERROR.getTitle())
+                        .detail("Ha ocurrido un error inesperado. Por favor, inténtelo de nuevo más tarde.")
                         .build()
         ));
     }
 
-    @ExceptionHandler(AuthorizationDeniedException.class)
-    public Mono<ResponseEntity<ApiResult<Void>>> handleAuthorizationDenied(AuthorizationDeniedException ex) {
-        log.warn("Acceso denegado: {}", ex.getMessage());
-
-        String mensajeUsuario = "No tienes permisos para realizar esta acción.";
-
-        return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN).body(
-                ApiResult.<Void>builder()
-                        .success(false)
-                        .code(HttpStatus.FORBIDDEN.value())
-                        .message(mensajeUsuario)
-                        .build()
-        ));
-    }
 
     // Recuperar causa raiz de la excepcion
     private Throwable getRootCause(Throwable throwable) {

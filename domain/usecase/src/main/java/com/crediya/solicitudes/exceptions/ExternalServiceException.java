@@ -1,7 +1,9 @@
 package com.crediya.solicitudes.exceptions;
 
-public class ExternalServiceException extends RuntimeException {
-    public ExternalServiceException(String error) {
-        super(error);
+import com.crediya.solicitudes.error.ErrorCode;
+
+public class ExternalServiceException extends UseCaseException{
+    public ExternalServiceException(ErrorCode errorCode, String message) {
+        super(errorCode, message);
     }
 }

@@ -1,6 +1,7 @@
 package com.crediya.solicitudes.microservicesclient.autenticacion.microservice;
 
 import com.crediya.solicitudes.dto.UsuarioInfo;
+import com.crediya.solicitudes.error.ErrorCode;
 import com.crediya.solicitudes.exceptions.ExternalServiceException;
 import com.crediya.solicitudes.ports.AutenticacionServiceClientPort;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +42,7 @@ public class HttpAutenticacionServiceClient implements AutenticacionServiceClien
                 .collectList()
                 .onErrorResume(e -> {
                     System.err.println("Error al obtener información de usuarios: " + e.getMessage());
-                    return Mono.error(new ExternalServiceException("Error de comunicación con el servicio de usuarios."));
+                    return Mono.error(new ExternalServiceException(ErrorCode.EXTERNAL_SERVICE_ERROR, "Error de comunicación con el servicio de usuarios."));
                 });
     }
 }

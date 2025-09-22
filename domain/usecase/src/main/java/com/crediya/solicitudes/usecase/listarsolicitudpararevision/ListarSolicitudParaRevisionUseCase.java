@@ -2,7 +2,8 @@ package com.crediya.solicitudes.usecase.listarsolicitudpararevision;
 
 import com.crediya.solicitudes.dto.SolicitudCompleta;
 import com.crediya.solicitudes.dto.UsuarioInfo;
-import com.crediya.solicitudes.exceptions.ExternalServiceException;
+import com.crediya.solicitudes.error.ErrorCode;
+import com.crediya.solicitudes.exceptions.ApplicationException;
 import com.crediya.solicitudes.model.estado.Estado;
 import com.crediya.solicitudes.model.estado.gateways.EstadoRepositoryPort;
 import com.crediya.solicitudes.model.solicitud.Solicitud;
@@ -37,7 +38,7 @@ public class ListarSolicitudParaRevisionUseCase {
                 .flatMap(solicitud -> procesarSolicitudIndividual(solicitud, token))
                 .onErrorResume(e -> {
                     log.severe("Error procesando solicitudes: " + e.getMessage());
-                    return Mono.error(new ExternalServiceException("Error procesando solicitudes"));
+                    return Mono.error(new ApplicationException(ErrorCode.PROCESSING_ERROR, "Error procesando solicitudes"));
                 });
     }
 
@@ -68,7 +69,7 @@ public class ListarSolicitudParaRevisionUseCase {
                     return Mono.just(construirSolicitudCompleta(solicitudEnriquecida, null));
                 }
 
-                UsuarioInfo usuarioInfo = usuarios.get(0);
+                UsuarioInfo usuarioInfo = usuarios.getFirst();
                 return Mono.just(construirSolicitudCompleta(solicitudEnriquecida, usuarioInfo));
             });
         }).onErrorResume(e -> {
